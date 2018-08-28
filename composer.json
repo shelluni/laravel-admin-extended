@@ -17,7 +17,8 @@
             "email": "66193332@qq.com"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload" : {
         "psr-4" : {
             "Shelluni\\Admin\\": "src/"
