@@ -1,0 +1,197 @@
+<?php
+
+namespace DummyNamespace;
+
+use App\Admin\Extensions\Form as ExtendedForm;
+use App\Admin\Extensions\Grid as ExtendedGrid;
+use App\Admin\Extensions\Traits\ModelForm as ExtendedModelForm;
+use DummyModelNamespace;
+use App\Core\BaseController;
+use Encore\Admin\Facades\Admin;
+use Encore\Admin\Grid\Tools;
+use Encore\Admin\Layout\Content;
+use Illuminate\Http\Request;
+
+/**
+ * TABLE_COMMENT
+ *
+ * Class DummyClass
+ * @package DummyNamespace
+ */
+class DummyClass extends BaseController
+{
+    use ExtendedModelForm;
+
+    const PAGE_HEADER = "TABLE_COMMENT";
+    const PAGE_DESC_INDEX  = "列表";
+    const PAGE_DESC_CREATE = "新建";
+    const PAGE_DESC_UPDATE = "编辑";
+
+    const FIELDS = [
+        CODE_CONST
+    ];
+
+    /**
+     * 路由中的id列表，其中true代表主键id
+     * 之后可以通过 $this->projectId 这种方式读取
+     * 注意使用驼峰法
+     *
+     * @var array
+     */
+    protected $idNames = [
+        // 'project_id' => false,
+        // 'stage_id' => false,
+        'subs' => true,   // 通过[ php artisan route:list | grep '路由突出的标识' ]这个命令来找到primaryId的名字，如果你路由是 unit/{unit_id}/subs，那么你填写subs
+    ];
+
+    /**
+     * 列表页
+     *
+     * @param $request
+     * @return Content
+     */
+    public function index(Request $request)
+    {
+        return Admin::content(function (Content $content) {
+
+            $c = get_called_class();
+
+            $content->header($c::PAGE_HEADER);
+            $content->description($c::PAGE_DESC_INDEX);
+
+            $content->body($this->grid());
+        });
+    }
+
+    /**
+     * 编辑页
+     *
+     * @param $request
+     * @return Content
+     */
+    public function edit(Request $request)
+    {
+        // preload
+        $this->preload($request);
+
+        return Admin::content(function (Content $content) {
+
+            $c = get_called_class();
+
+            $content->header($c::PAGE_HEADER);
+            $content->description($c::PAGE_DESC_UPDATE);
+
+            $content->body($this->form()->edit($this->primaryId));
+        });
+    }
+
+    /**
+     * 新增页
+     *
+     * @param $request
+     * @return Content
+     */
+    public function create(Request $request)
+    {
+        return Admin::content(function (Content $content) {
+
+            $c = get_called_class();
+
+            $content->header($c::PAGE_HEADER);
+            $content->description($c::PAGE_DESC_CREATE);
+
+            $content->body($this->form());
+        });
+    }
+
+    /**
+     * 列表区
+     *
+     * @return ExtendedGrid
+     */
+    protected function grid()
+    {
+        return DummyModel::extendedGrid(function (ExtendedGrid $grid) {
+
+            // **********************************
+            // UI设定
+            // **********************************
+
+            // 禁多选（列表中的选项框）
+            // $grid->disableRowSelector();
+
+            // 禁操作（列表中的操作栏）
+            // $grid->disableActions();
+            // $grid->actions(function ($actions) {
+            //     $actions->disableDelete();
+            //     $actions->disableEdit();
+            //
+            //     $id = $actions->getKey();
+            //     $actions->append('<a href="/platform/xxxx/' . $id . '"><i class="fa fa-flask"></i></a>');
+            // });
+
+            // 禁搜索
+            // $grid->disableFilter();
+
+            // 禁导出
+            // $grid->disableExport();
+
+            // 禁新建
+            // $grid->disableCreation();
+
+            // 工具栏
+            $grid->tools(function (Tools $tools) {
+
+                // 禁刷新按钮
+                // $tools->disableRefreshButton();
+
+                // 批量
+                // $tools->batch(function ($batch) {
+                //     // 禁批量删除
+                //     $batch->disableDelete();
+                //
+                //     // 新增发布文章
+                //     // @see http://laravel-admin.org/docs/#/zh/model-grid-custom-tools
+                //     $batch->add('发布文章', new ReleasePost(1));
+                // });
+            });
+
+            // 搜索
+            $grid->filter(function($filter) {
+
+                // 去掉默认的id过滤器
+                // $filter->disableIdFilter();
+
+                // 在这里添加字段过滤器
+                // $filter->like('name', self::FIELDS['name']);
+                // http://laravel-admin.org/docs/#/zh/model-grid-filters
+            });
+
+            // **********************************
+            // 数据源
+            // **********************************
+
+            // 修改数据源
+            // $grid->model()->where('type', 1);
+
+            // **********************************
+            // 列设定
+            // **********************************
+
+            CODE_GRID
+        });
+    }
+
+    /**
+     * 表单区
+     *
+     * @return ExtendedForm
+     */
+    protected function form()
+    {
+        return DummyModel::extendedForm(function (ExtendedForm $form) {
+
+            CODE_FORM
+        });
+    }
+}

@@ -1,0 +1,38 @@
+<?php
+
+namespace DummyNamespace;
+
+use DummyModelNamespace;
+
+use Encore\Admin\Form;
+use Encore\Admin\Grid;
+use Encore\Admin\Facades\Admin;
+use Encore\Admin\Layout\Content;
+use App\Http\Controllers\Controller;
+use Encore\Admin\Controllers\ModelForm;
+
+class DummyClass extends Controller
+{
+
+    /**
+     * 静态Tab显示页
+     *
+     * @return Content
+     */
+    public function index()
+    {
+        return Admin::content(function (Content $content) {
+            $content->header('PAGE_HEADER');
+            $content->description('PAGE_DESC');
+
+            $st = new StaticTab();
+            TABS_CODE
+            $st->active(ACTIVE_SHEET);
+
+            $content->row(function (Row $row) use ($st) {
+                $row->column(12, $st);
+            });
+        });
+    }
+
+}
