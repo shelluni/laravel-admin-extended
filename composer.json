@@ -1,0 +1,26 @@
+{
+    "name": "shelluni/laravel-admin-extended",
+    "description": "laravel admin extended",
+    "type": "library",
+    "require": {
+        "php": ">=7.0.0",
+        "encore/laravel-admin": "1.5.7",
+        "maatwebsite/excel": "3.0.x-dev"
+    },
+    "require-dev": {
+        "encore/laravel-admin": "1.5.7"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "renyi",
+            "email": "66193332@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload" : {
+        "psr-4" : {
+            "Shelluni\\Admin\\": "src/"
+        }
+    }
+}
