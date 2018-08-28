@@ -24,7 +24,7 @@ class Builder extends \Encore\Admin\Form\Builder
      *
      * @var string
      */
-    protected $view = 'admin.form';
+    protected $view = 'admin_extended::form';
 
     // **************************************************
     // 新的options

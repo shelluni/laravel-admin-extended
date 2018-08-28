@@ -210,7 +210,7 @@ class SimpleContent implements Renderable
             'content'     => $this->build(),
         ];
 
-        return view('admin.simple_content', $items)->render();
+        return view('admin_extended::simple_content', $items)->render();
     }
 
     /**

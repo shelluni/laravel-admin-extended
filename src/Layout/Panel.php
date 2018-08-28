@@ -113,7 +113,7 @@ class Panel implements Renderable
             'content' => $this->build(),
         ];
 
-        return view('admin.layout.panel', $items)->render();
+        return view('admin_extended::layout.panel', $items)->render();
     }
 
     /**

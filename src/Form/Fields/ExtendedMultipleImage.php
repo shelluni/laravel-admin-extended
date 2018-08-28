@@ -19,7 +19,7 @@ class ExtendedMultipleImage extends MultipleImage
 {
     use ImageField;
 
-    protected $view = "admin.form.extended_multiplefile";
+    protected $view = "admin_extended::form.extended_multiplefile";
 
     protected $rules = '';
 

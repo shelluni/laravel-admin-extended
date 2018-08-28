@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class MultipleSelectHidden extends Field
 {
-    protected $view = 'admin.form.multiple_select_hidden';
+    protected $view = 'admin_extended::form.multiple_select_hidden';
 
     /**
      * Other key for many-to-many relation.

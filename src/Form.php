@@ -29,7 +29,7 @@ class Form extends \Encore\Admin\Form
      *
      * @var string
      */
-    protected $view = 'admin.form';
+    protected $view = 'admin_extended::form';
 
     // **************************************************
     // 支持 自定义的提交后跳转的地址

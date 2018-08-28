@@ -14,7 +14,7 @@ use Encore\Admin\Form\Field\DateRange;
 
 class ExtendedDateRange extends DateRange
 {
-    protected $view = "admin.form.extended_daterange";
+    protected $view = "admin_extended::form.extended_daterange";
 
     protected $start;
     protected $end;

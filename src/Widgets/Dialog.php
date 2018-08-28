@@ -172,7 +172,7 @@ class Dialog
     /**
      * @var string
      */
-    protected $view = 'admin.widgets.dialog';
+    protected $view = 'admin_extended::widgets.dialog';
 
     /**
      * Create a new dialog instance.

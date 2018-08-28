@@ -1,78 +1,22 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: shelluni
+ * User: renyi
  * Date: 8/28/18
- * Time: 9:00 AM
+ * Time: 4:48 PM
  */
 
-namespace Shelluni\Admin;
+namespace Shelluni\Admin\Traits;
 
-use Closure;
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Facades\Input;
 use Shelluni\Admin\Grid\ExtendedExporter;
 use Shelluni\Admin\Grid\PrinterManager;
 use Shelluni\Admin\Grid\Tools\BackToListButton;
 use Shelluni\Admin\Grid\Tools\PrintButton;
+use Shelluni\Admin\Toolbar;
 
-class Grid extends \Encore\Admin\Grid
+trait GridUITrait
 {
-    // **************************************************
-    // 支持 新的模板
-    // **************************************************
-
-    /**
-     * View for grid to render.
-     *
-     * @var string
-     */
-    protected $view = 'admin_extended::grid.table';
-
-    // **************************************************
-    // 新的options 增加
-    // usePrinter
-    // useTop
-    // useBottom
-    // useBackToList
-    // **************************************************
-
-    /**
-     * Options for grid.
-     *
-     * @var array
-     */
-    protected $options = [
-        'usePagination'     => true,
-        'useFilter'         => true,
-        'useExporter'       => true,
-        'usePrinter'        => false,
-        'useActions'        => true,
-        'useRowSelector'    => true,
-        'allowCreate'       => true,
-        'useTop'            => false,
-        'useBottom'         => false,
-        'useBackToList'     => false,
-        'useTitle'          => false,
-    ];
-
-    // **************************************************
-    // 新的构造函数
-    // **************************************************
-    /**
-     * Create a new grid instance.
-     *
-     * @param Eloquent $model
-     * @param Closure  $builder
-     */
-    public function __construct(Eloquent $model, Closure $builder)
-    {
-        parent::__construct($model, $builder);
-
-        $this->setupPrinter();
-        $this->setupToolbars();
-    }
-
     // **************************************************
     // 支持 顶部扩展
     // **************************************************

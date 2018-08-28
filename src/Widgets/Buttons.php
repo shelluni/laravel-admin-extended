@@ -14,7 +14,7 @@ use Illuminate\Contracts\Support\Renderable;
 class Buttons extends Widget implements Renderable
 {
     // 模板
-    protected $view = 'admin.widgets.buttons';
+    protected $view = 'admin_extended::widgets.buttons';
 
     // 数据
     protected $data = [

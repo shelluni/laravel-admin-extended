@@ -132,7 +132,7 @@ class Form extends \Encore\Admin\Widgets\Form implements Renderable
      */
     public function render()
     {
-        return view('admin.widgets.form', $this->getVariables())->render();
+        return view('admin_extended::widgets.form', $this->getVariables())->render();
     }
 
 }

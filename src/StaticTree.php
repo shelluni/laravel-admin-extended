@@ -44,8 +44,8 @@ class StaticTree implements Renderable
      * @var string
      */
     protected $view = [
-        'tree'   => 'admin.tree.static_tree',
-        'branch' => 'admin.tree.static_tree_branch',
+        'tree'   => 'admin_extended::tree.static_tree',
+        'branch' => 'admin_extended::tree.static_tree_branch',
     ];
 
     /**

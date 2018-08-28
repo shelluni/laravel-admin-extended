@@ -16,7 +16,7 @@ class StaticTab extends Widget implements Renderable
     /**
      * @var string
      */
-    protected $view = 'admin.widgets.statictab';
+    protected $view = 'admin_extended::widgets.statictab';
 
     /**
      * @var array

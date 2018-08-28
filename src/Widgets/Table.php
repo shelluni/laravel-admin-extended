@@ -17,7 +17,7 @@ class Table extends Widget implements Renderable
     /**
      * @var string
      */
-    protected $view = 'admin.widgets.table';
+    protected $view = 'admin_extended::widgets.table';
 
     /**
      * @var array

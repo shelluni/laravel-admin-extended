@@ -16,7 +16,7 @@ class Box extends Widget implements Renderable
     /**
      * @var string
      */
-    protected $view = 'admin.widgets.box';
+    protected $view = 'admin_extended::widgets.box';
 
     /**
      * @var string
