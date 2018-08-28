@@ -8,16 +8,22 @@
 
 namespace Shelluni\Admin;
 
-use Closure;
+use Encore\Admin\Grid\Displayers\RowSelector;
 use Illuminate\Database\Eloquent\Model as Eloquent;
-use Illuminate\Support\Facades\Input;
-use Shelluni\Admin\Grid\ExtendedExporter;
-use Shelluni\Admin\Grid\PrinterManager;
-use Shelluni\Admin\Grid\Tools\BackToListButton;
-use Shelluni\Admin\Grid\Tools\PrintButton;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Jenssegers\Mongodb\Eloquent\Model as MongodbModel;
+use Shelluni\Admin\Grid\Column as ExtendedColumn;
+use Shelluni\Admin\Traits\GridUITrait;
 
 class Grid extends \Encore\Admin\Grid
 {
+    use GridUITrait;
+
     // **************************************************
     // 支持 新的模板
     // **************************************************
@@ -63,9 +69,9 @@ class Grid extends \Encore\Admin\Grid
      * Create a new grid instance.
      *
      * @param Eloquent $model
-     * @param Closure  $builder
+     * @param \Closure  $builder
      */
-    public function __construct(Eloquent $model, Closure $builder)
+    public function __construct(Eloquent $model, \Closure $builder)
     {
         parent::__construct($model, $builder);
 
@@ -74,378 +80,240 @@ class Grid extends \Encore\Admin\Grid
     }
 
     // **************************************************
-    // 支持 顶部扩展
+    // 与column相关函数
     // **************************************************
 
     /**
-     * If grid allows Top
+     * Add column to Grid.
      *
-     * @return bool
-     */
-    public function allowTop()
-    {
-        return $this->option('useTop');
-    }
-
-    /**
-     * Disable Top.
+     * @param string $name
+     * @param string $label
      *
-     * @return $this
+     * @return ExtendedColumn
      */
-    public function enableTop()
+    public function column($name, $label = '')
     {
-        return $this->option('useTop', true);
-    }
+        $relationName = $relationColumn = '';
 
-    /**
-     * 渲染Top
-     *
-     * @return string
-     */
-    public function renderTop()
-    {
-        return "";
-    }
+        if (strpos($name, '.') !== false) {
+            list($relationName, $relationColumn) = explode('.', $name);
 
-    // **************************************************
-    // 支持 底部扩展
-    // **************************************************
+            $relation = $this->model()->eloquent()->$relationName();
 
-    protected $contentBottom = "";
+            $label = empty($label) ? ucfirst($relationColumn) : $label;
 
-    /**
-     * If grid allows Bottom
-     *
-     * @return bool
-     */
-    public function allowBottom()
-    {
-        return $this->option('useBottom');
-    }
-
-    /**
-     * Enable Bottom.
-     *
-     * @return $this
-     */
-    public function enableBottom()
-    {
-        return $this->option('useBottom', true);
-    }
-
-    /**
-     * 设定Bottom内容
-     *
-     * @param $content
-     */
-    public function setBottom($content)
-    {
-        $this->contentBottom = $content;
-    }
-
-    /**
-     * 渲染Bottom
-     *
-     * @return string
-     */
-    public function renderBottom()
-    {
-        if ($this->allowBottom())
-        {
-            return $this->content_bottom;
+            $name = snake_case($relationName).'.'.$relationColumn;
         }
 
-        return "";
-    }
+        $column = $this->addColumn($name, $label);
 
-    // **************************************************
-    // 支持 返回导航按钮
-    // **************************************************
-
-    protected $back_to_list_url;
-
-    public function setBackToListURL($url)
-    {
-        $this->back_to_list_url = $url;
-    }
-
-    /**
-     * If grid allows print
-     *
-     * @return bool
-     */
-    public function allowBackToList()
-    {
-        return $this->option('useBackToList');
-    }
-
-    /**
-     * Disable print.
-     *
-     * @return $this
-     */
-    public function enableBackToList()
-    {
-        return $this->option('useBackToList', true);
-    }
-
-    /**
-     * 渲染打印按钮
-     *
-     * @return BackToListButton
-     */
-    public function renderBackToListButton()
-    {
-        $button = new BackToListButton($this);
-        $button->setURL($this->back_to_list_url);
-
-        return $button;
-    }
-
-    // **************************************************
-    // 支持 打印按钮
-    // **************************************************
-
-    /**
-     * If grid allows print
-     *
-     * @return bool
-     */
-    public function allowPrinter()
-    {
-        return $this->option('usePrinter');
-    }
-
-    /**
-     * Disable print.
-     *
-     * @return $this
-     */
-    public function enablePrinter()
-    {
-        return $this->option('usePrinter', true);
-    }
-
-    /**
-     * 渲染打印按钮
-     *
-     * @return PrintButton
-     */
-    public function renderPrintButton()
-    {
-        return new PrintButton($this);
-    }
-
-    /**
-     * 出发打印链接
-     *
-     * @param int $scope
-     * @param null $args
-     * @return string
-     */
-    public function printUrl($scope = 1, $args = null)
-    {
-        $input = array_merge(Input::all(), PrinterManager::formatPrintQuery($scope, $args));
-
-        return $this->resource().'?'.http_build_query($input);
-    }
-
-    // **************************************************
-    // 支持 自定义打印
-    // **************************************************
-
-    /**
-     * Export driver.
-     *
-     * @var string
-     */
-    protected $printer;
-
-    /**
-     * Set printer driver for Grid to print.
-     *
-     * @param $printer
-     *
-     * @return $this
-     */
-    public function printer($printer)
-    {
-        $this->printer = $printer;
-
-        return $this;
-    }
-
-    /**
-     * Setup grid printer.
-     *
-     * @return void
-     */
-    protected function setupPrinter()
-    {
-        if ($scope = Input::get(PrinterManager::$queryName)) {
-            $this->model()->usePaginate(false);
-
-            call_user_func($this->builder, $this);
-
-            (new PrinterManager($this))->resolve($this->printer)->withScope($scope)->run();
+        if (isset($relation) && $relation instanceof Relation) {
+            $this->model()->with($relationName);
+            $column->setRelation($relationName, $relationColumn);
         }
+
+        return $column;
     }
 
-    // **************************************************
-    // 支持 新的导出能力
-    // **************************************************
     /**
-     * Setup grid exporter.
+     * Add column to grid.
+     *
+     * @param string $column
+     * @param string $label
+     *
+     * @return ExtendedColumn
+     */
+    protected function addColumn($column = '', $label = '')
+    {
+        $column = new ExtendedColumn($column, $label);
+        $column->setGrid($this);
+
+        return $this->columns[] = $column;
+    }
+
+    /**
+     * Prepend checkbox column for grid.
      *
      * @return void
      */
-    protected function setupExporter()
+    protected function prependRowSelectorColumn()
     {
-        if ($scope = Input::get(ExtendedExporter::$queryName))
-        {
-            $this->model()->usePaginate(false);
-
-            (new ExtendedExporter($this))->resolve($this->exporter)->withScope($scope)->export();
+        if (!$this->option('useRowSelector')) {
+            return;
         }
-    }
 
-    // **************************************************
-    // 支持 title
-    // **************************************************
+        $grid = $this;
 
-    protected $title;
+        $column = new ExtendedColumn(ExtendedColumn::SELECT_COLUMN_NAME, ' ');
+        $column->setGrid($this);
 
-    public function setTitle($title)
-    {
-        $this->title = $title;
-    }
+        $column->display(function ($value) use ($grid, $column) {
+            $actions = new RowSelector($value, $grid, $column, $this);
 
-    /**
-     * If grid allows print
-     *
-     * @return bool
-     */
-    public function allowTitle()
-    {
-        return $this->option('useTitle');
+            return $actions->display();
+        });
+
+        $this->columns->prepend($column);
     }
 
     /**
-     * Disable print.
-     *
-     * @return $this
-     */
-    public function enableTitle()
-    {
-        return $this->option('useTitle', true);
-    }
-
-    /**
-     * 渲染打印按钮
-     *
-     * @return BackToListButton
-     */
-    public function renderTitle()
-    {
-        return $this->title;
-    }
-
-    // **************************************************
-    // 支持 toolbar
-    // **************************************************
-
-    /**
-     * 左侧工具条
-     * @var Toolbar
-     */
-    protected $toolbarLeft;
-
-    /**
-     * 右侧工具条
-     * @var Toolbar
-     */
-    protected $toolbarRight;
-
-    /**
-     * Setup grid left toolbar.
-     *
-     * @param Closure $callback
+     * Build the grid.
      *
      * @return void
      */
-    public function toolbarLeft(Closure $callback)
+    public function build()
     {
-        call_user_func($callback, $this->toolbarLeft);
-    }
+        if ($this->builded) {
+            return;
+        }
 
-    public function renderToolbarLeft()
-    {
-        return $this->toolbarLeft->render();
+        $data = $this->processFilter();
+
+        $this->prependRowSelectorColumn();
+        $this->appendActionsColumn();
+
+        ExtendedColumn::setOriginalGridData($data);
+
+        $this->columns->map(function (ExtendedColumn $column) use (&$data) {
+            $data = $column->fill($data);
+
+            $this->columnNames[] = $column->getName();
+        });
+
+        $this->buildRows($data);
+
+        $this->builded = true;
     }
 
     /**
-     * Setup grid right toolbar.
+     * Handle table column for grid.
      *
-     * @param Closure $callback
+     * @param string $method
+     * @param string $label
      *
-     * @return void
+     * @return bool|ExtendedColumn
      */
-    public function toolbarRight(Closure $callback)
+    protected function handleTableColumn($method, $label)
     {
-        call_user_func($callback, $this->toolbarRight);
-    }
+        if (empty($this->dbColumns)) {
+            $this->setDbColumns();
+        }
 
-    public function renderToolbarRight()
-    {
-        return $this->toolbarRight->render();
+        if ($this->dbColumns->has($method)) {
+            return $this->addColumn($method, $label);
+        }
+
+        return false;
     }
 
     /**
-     * Setup grid toolbars.
+     * Handle get mutator column for grid.
+     *
+     * @param string $method
+     * @param string $label
+     *
+     * @return bool|ExtendedColumn
      */
-    public function setupToolbars()
+    protected function handleGetMutatorColumn($method, $label)
     {
-        $this->toolbarLeft = new Toolbar($this);
+        if ($this->model()->eloquent()->hasGetMutator($method)) {
+            return $this->addColumn($method, $label);
+        }
 
-        $this->toolbarRight = new Toolbar($this);
-    }
-
-    // **************************************************
-    // 支持 设定container的class
-    // **************************************************
-    protected $containerClass = "box box-info";
-
-    public function containerClass()
-    {
-        return $this->containerClass;
+        return false;
     }
 
     /**
-     * @param string $containerClass
+     * Handle relation column for grid.
+     *
+     * @param string $method
+     * @param string $label
+     *
+     * @return bool|ExtendedColumn
      */
-    public function setContainerClass(string $containerClass)
+    protected function handleRelationColumn($method, $label)
     {
-        $this->containerClass = $containerClass;
+        $model = $this->model()->eloquent();
+
+        if (!method_exists($model, $method)) {
+            return false;
+        }
+
+        if (!($relation = $model->$method()) instanceof Relation) {
+            return false;
+        }
+
+        if ($relation instanceof HasOne || $relation instanceof BelongsTo) {
+            $this->model()->with($method);
+
+            return $this->addColumn($method, $label)->setRelation(snake_case($method));
+        }
+
+        if ($relation instanceof HasMany || $relation instanceof BelongsToMany || $relation instanceof MorphToMany) {
+            $this->model()->with($method);
+
+            return $this->addColumn(snake_case($method), $label);
+        }
+
+        return false;
     }
 
-    // **************************************************
-    // 支持 设定table的class
-    // **************************************************
-    protected $tableClass = "table table-hover table-bordered";
-
     /**
-     * @return string
+     * Dynamically add columns to the grid view.
+     *
+     * @param $method
+     * @param $arguments
+     *
+     * @return ExtendedColumn
      */
-    public function tableClass()
+    public function __call($method, $arguments)
     {
-        return $this->tableClass;
+        $label = isset($arguments[0]) ? $arguments[0] : ucfirst($method);
+
+        if ($this->model()->eloquent() instanceof MongodbModel) {
+            return $this->addColumn($method, $label);
+        }
+
+        if ($column = $this->handleGetMutatorColumn($method, $label)) {
+            return $column;
+        }
+
+        if ($column = $this->handleRelationColumn($method, $label)) {
+            return $column;
+        }
+
+        if ($column = $this->handleTableColumn($method, $label)) {
+            return $column;
+        }
+
+        return $this->addColumn($method, $label);
     }
 
     /**
-     * @param string $tableClass
+     * Register column displayers.
+     *
+     * @return void.
      */
-    public function setTableClass(string $tableClass)
+    public static function registerColumnDisplayer()
     {
-        $this->tableClass = $tableClass;
+        $map = [
+            'editable'    => \Encore\Admin\Grid\Displayers\Editable::class,
+            'switch'      => \Encore\Admin\Grid\Displayers\SwitchDisplay::class,
+            'switchGroup' => \Encore\Admin\Grid\Displayers\SwitchGroup::class,
+            'select'      => \Encore\Admin\Grid\Displayers\Select::class,
+            'image'       => \Encore\Admin\Grid\Displayers\Image::class,
+            'label'       => \Encore\Admin\Grid\Displayers\Label::class,
+            'button'      => \Encore\Admin\Grid\Displayers\Button::class,
+            'link'        => \Encore\Admin\Grid\Displayers\Link::class,
+            'badge'       => \Encore\Admin\Grid\Displayers\Badge::class,
+            'progressBar' => \Encore\Admin\Grid\Displayers\ProgressBar::class,
+            'radio'       => \Encore\Admin\Grid\Displayers\Radio::class,
+            'checkbox'    => \Encore\Admin\Grid\Displayers\Checkbox::class,
+            'orderable'   => \Encore\Admin\Grid\Displayers\Orderable::class,
+        ];
+
+        foreach ($map as $abstract => $class) {
+            ExtendedColumn::extend($abstract, $class);
+        }
     }
 }
