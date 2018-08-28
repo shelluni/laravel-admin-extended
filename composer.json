@@ -5,10 +5,9 @@
     "require": {
         "php": ">=7.0.0",
         "encore/laravel-admin": "1.5.7",
-        "maatwebsite/excel": "3.0.x-dev"
+        "maatwebsite/excel": "^3.0"
     },
     "require-dev": {
-        "encore/laravel-admin": "1.5.7"
     },
     "license": "MIT",
     "authors": [
