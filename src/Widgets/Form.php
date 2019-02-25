@@ -87,9 +87,9 @@ class Form extends \Encore\Admin\Widgets\Form implements Renderable
      *
      * @return $this
      */
-    public function disableRest()
+    public function disableReset()
     {
-        $this->options['enable_rest'] = false;
+        $this->options['enable_reset'] = false;
 
         return $this;
     }

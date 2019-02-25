@@ -13,7 +13,7 @@
         <div class="col-md-2"></div>
 
         <div class="col-md-8">
-            @if($options['enable_rest'])
+            @if($options['enable_reset'])
             <div class="btn-group pull-left">
                 <button type="reset" class="btn btn-warning pull-right">{{ $options['button_text_reset']=='' ?: trans('admin.reset') }}</button>
             </div>
